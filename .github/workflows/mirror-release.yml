@@ -33,7 +33,7 @@ jobs:
       - name: Check existing tag
         run: |
           tag=$(git ls-remote --tags --refs origin "refs/tags/v$VERSION")
-          if [ -z "$tag" ]; then
+          if [ -n "$tag" ]; then
             echo "Version $VERSION is already mirrored"
             exit 1
           fi
