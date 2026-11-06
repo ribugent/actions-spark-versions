@@ -1,0 +1,39 @@
+name: Discover Spark releases
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: discover-spark-releases
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.versions.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Find missing versions
+        id: versions
+        run: versions=$(scripts/find_missing_versions.py) && echo "versions=$versions" >> "$GITHUB_OUTPUT"
+
+  mirror:
+    needs: discover
+    if: ${{ needs.discover.outputs.versions != '[]' }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        version: ${{ fromJSON(needs.discover.outputs.versions) }}
+    uses: ./.github/workflows/mirror-release.yml
+    with:
+      version: ${{ matrix.version }}
