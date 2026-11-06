@@ -8,7 +8,7 @@ This repository maintains a mirror of official Apache Spark releases on GitHub R
 - Avoid potential timeouts or failures due to slow mirror responses
 - Maintain consistent download speeds across all your workflow runs
 
-The mirroring process is automated and ensures that the files are identical to those available from the official Apache sources.
+New stable releases are checked daily and mirrored automatically. Older releases from the Apache archive can also be mirrored manually. Mirrored files are identical to those available from the official Apache sources.
 
 ## Usage
 
