@@ -16,6 +16,8 @@ permissions:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,33 +33,32 @@ jobs:
       - name: Create tag
         id: tag
         run: |
-          git checkout --orphan spark-${{ github.event.inputs.version }}
+          git checkout --orphan "spark-$VERSION"
           git rm -rf .
-          git commit --allow-empty -m "Spark release ${{ github.event.inputs.version }}"
-          git push origin spark-${{ github.event.inputs.version }}
-          echo commit=$(git rev-parse HEAD) >> $GITHUB_OUTPUT
+          git commit --allow-empty -m "Spark release $VERSION"
+          git push origin "spark-$VERSION"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Download release files
         run: |
-          wget -e robots=off  -r -l 0 -np -nd -A "spark-*-bin-*" https://dlcdn.apache.org/spark/spark-${{ github.event.inputs.version }}/ || \
-            wget -e robots=off  -r -l 0 -np -nd -A "spark-*-bin-*" https://archive.apache.org/dist/spark/spark-${{ github.event.inputs.version }}/
+          wget -e robots=off  -r -l 0 -np -nd -A "spark-*-bin-*" "https://dlcdn.apache.org/spark/spark-$VERSION/" || \
+            wget -e robots=off  -r -l 0 -np -nd -A "spark-*-bin-*" "https://archive.apache.org/dist/spark/spark-$VERSION/"
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.event.inputs.version }}
+          tag_name: v${{ inputs.version }}
           target_commitish: ${{ steps.tag.outputs.commit }}
           files: spark-*-bin-*
-          name: Spark ${{ github.event.inputs.version }}
+          name: Spark ${{ inputs.version }}
           fail_on_unmatched_files: true
 
       - name: Cleanup branch
         if: always()
         run: |
-          git push origin --delete spark-${{ github.event.inputs.version }} || '0'
+          git push origin --delete "spark-$VERSION" || true
 
       - name: Cleanup tag on failure
         if: failure()
         run: |
-          git fetch --tags
-          git push origin --delete v${{ github.event.inputs.version }} || '0'
+          git push origin --delete "v$VERSION" || true
