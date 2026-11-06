@@ -30,7 +30,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Create tag
+      - name: Create release branch
         id: tag
         run: |
           git checkout --orphan "spark-$VERSION"
