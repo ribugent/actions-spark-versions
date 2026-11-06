@@ -9,6 +9,11 @@ on:
       version:
         type: string
         required: true
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -38,7 +43,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Create release branch
-        id: tag
+        id: branch
         run: |
           git checkout --orphan "spark-$VERSION"
           git rm -rf .
@@ -55,13 +60,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
-          target_commitish: ${{ steps.tag.outputs.commit }}
+          target_commitish: ${{ steps.branch.outputs.commit }}
           files: spark-*-bin-*
           name: Spark ${{ inputs.version }}
           fail_on_unmatched_files: true
 
       - name: Cleanup branch
-        if: ${{ always() && steps.tag.outputs.commit != '' }}
+        if: ${{ always() && steps.branch.outputs.commit != '' }}
         run: |
           git push origin --delete "spark-$VERSION" || true
 
