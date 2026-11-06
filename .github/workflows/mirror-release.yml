@@ -61,11 +61,11 @@ jobs:
           fail_on_unmatched_files: true
 
       - name: Cleanup branch
-        if: always()
+        if: ${{ always() && steps.tag.outputs.commit != '' }}
         run: |
           git push origin --delete "spark-$VERSION" || true
 
-      - name: Cleanup tag on failure
-        if: failure()
+      - name: Cleanup tag on failure or cancellation
+        if: ${{ (failure() || cancelled()) && steps.check.outputs.missing == 'true' && steps.release.outcome != 'success' }}
         run: |
           git push origin --delete "v$VERSION" || true
