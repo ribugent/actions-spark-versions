@@ -36,6 +36,7 @@ jobs:
           if [ -z "$tag" ]; then
             echo "Version $VERSION is already mirrored"
             exit 1
+          fi
 
       - name: Setup user
         run: |
